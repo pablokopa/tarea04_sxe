@@ -14,6 +14,7 @@
 
 <details>
 <summary> 3. Ahora es necesario descargar Apache y MariaDB:</summary>
+
 Actualizar el repositorio de paquetes
     
 ```bash
@@ -72,3 +73,24 @@ echo "<?php phpinfo(); ?>" | tee /var/www/html/info.php
 
 ---
 ### 2. Utiliza esta guía para instalar wordpress en el contenedor.
+1. Se instalan todas las dependencias necesarias:
+```bash
+sudo apt install apache2 \
+                 ghostscript \
+                 libapache2-mod-php \
+                 mysql-server \
+                 php \
+                 php-bcmath \
+                 php-curl \
+                 php-imagick \
+                 php-intl \
+                 php-json \
+                 php-mbstring \
+                 php-mysql \
+                 php-xml \
+                 php-zip
+```
+2. Se instala WordPress utilizando:
+```bash
+
+```
