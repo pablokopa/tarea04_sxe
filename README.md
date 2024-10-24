@@ -1,4 +1,4 @@
-# TAREA_04 - SXE
+![imagen](https://github.com/user-attachments/assets/d411c069-fb0e-4d79-a8f6-1f27066001a0)# TAREA_04 - SXE
 
 ### 1. Utiliza la imagen de Ubuntu tag 22, y apoyandote en esta guía sigue sus instrucciones para instalar LAMP en dicho contenedor.
 
@@ -50,3 +50,10 @@
     apt install systemctl
     systemctl restart apache2
     ```
+#### Comprobaciones
+Para comprobar el correcto funcionamiento hay que entrar en la ip del equipo y poner el siguiente comando:
+```bash
+echo "<?php phpinfo(); ?>" | tee /var/www/html/info.php
+```
+Una vez hecho esto, accedemos a la web y comprobamos que funciona:
+![imagen](https://github.com/user-attachments/assets/2e9ad564-10ff-4939-8cff-f02fad72791b)
