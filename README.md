@@ -1,36 +1,43 @@
 # TAREA04_SXE
-
-### 1. Utiliza la imagen de Ubuntu tag 22, e instala LAMP en dicho contenedor.
-
-1. Para descargar la imagen de **Ubuntu 22.04**:
-```bash
- docker image pull ubuntu:22.04
-```
-2. Se crea un *contenedor* con la imagen de Ubuntu y se accede a el:
-```bash
- docker run -it --name ubuntu22 -p 8000:80 ubuntu:22.04 /bin/bash
- docker start -ai ubuntu22
-```
+---
+### 1. Utiliza la imagen de Ubuntu 22, e instala LAMP en dicho contenedor.
 
 <details>
-<summary> 3. Ahora es necesario descargar Apache y MariaDB:</summary>
+<summary> <b> 1. Para descargar la imagen de Ubuntu 22.04: </b></summary>
+<br>
+
+```bash
+docker image pull ubuntu:22.04
+```
+</details>
+
+<details>
+<summary> <b> 2. Se crea un <i> contenedor </i> con la imagen de Ubuntu y se accede a el: </b></summary>
+<br>
+
+```bash
+docker run -it --name ubuntu22 -p 8000:80 ubuntu:22.04 /bin/bash
+```
+</details>
+
+<details>
+<summary> <b> 3. Ahora es necesario descargar Apache y MariaDB: </b></summary>
+<br>
 
 Actualizar el repositorio de paquetes
-    
 ```bash
-sudo apt update
+apt update
 ```
 
 Instalar **Apache**:
 ```bash
-sudo apt install -y apache2 apache2-utils
+apt install -y apache2 apache2-utils
 ```
 Instalar **MariaDB**:
 ```bash
 sudo apt install -y mariadb-server mariadb-client
 ```
 
-> [!IMPORTANT]
 > La opción **-y** responde "sí" automáticamente a cualquier solicitud de confirmación durante la instalación.
 
 Se inicializa MariaDB para poder continuar y usar comandos PHP:
@@ -40,20 +47,27 @@ service mariadb start
 </details>
     
 <details>
-<summary> 4. Lo siguiente es descargar PHP</summary>
+<summary> <b> 4. Lo siguiente es descargar PHP </b> </summary>
+<br>
 
 Se asegura la instalación de MySQL utilizando:
 ```bash
 mysql_secure_installation
 ```
-Y se siguen los pasos indicados en la guía.
+
+<details>
+<summary> Y se siguen los pasos indicados en la guía. </summary>
+<br>
+
+![imagen](https://github.com/user-attachments/assets/53a9ce65-da9a-4bde-b488-7c489f3e0ee0)
+</details>
 
 Ahora se instala **PHP**:
 ```bash
 apt install -y php php-mysql libapache2-mod-php
 ```
 
-Y finalmente se instala systemctl y se reinicia el servicio de Apache:
+Y finalmente se instala **systemctl** y se reinicia el servicio de Apache:
 
 ```bash
 apt install systemctl
@@ -61,22 +75,32 @@ systemctl restart apache2
 ```
 </details>
 
-### Comprobaciones
-Para comprobar el correcto funcionamiento hay que entrar en la ip del equipo y poner el siguiente comando:
+<details>
+<summary> <b> Comprobaciones </b> </summary>
+<br>
+
+Para comprobar el correcto funcionamiento hay que entrar en la IP del equipo desde el navegador (junto al puerto seleccionado) y poner el siguiente comando en consola, el cúal crea un archivo de información de PHP:
 ```bash
 echo "<?php phpinfo(); ?>" | tee /var/www/html/info.php
 ```
 
+**IP** y **puerto** para comprobar resultados (en mi caso).
+```bash
+http://10.0.9.153:8000/
+```
 <details>
 <summary> Una vez hecho esto, accedemos a la web y comprobamos que funciona:</summary>
+<br>
 
 ![imagen](https://github.com/user-attachments/assets/2e9ad564-10ff-4939-8cff-f02fad72791b)
+</details>
 </details>
 
 ---
 ### 2. Instalar wordpress en el contenedor.
 <details>
-<summary> 1. Se instalan todas las dependencias necesarias:</summary>
+<summary> <b> 1. Se instalan todas las dependencias necesarias: </b> </summary>
+<br>
 
 ```bash
 sudo apt install apache2 \
@@ -98,93 +122,115 @@ sudo apt install apache2 \
 </details>
 
 <details>
-<summary> 2. Se instala WordPress utilizando: </summary>
+<summary> <b> 2. Se instala WordPress utilizando: </b> </summary>
+<br>
 
 ```bash
+# Crea un directorio
 mkdir -p /srv/www
+
+# Cambia la propiedad
 sudo chown www-data: /srv/www
+
+# Descarga la última versión de WordPress y la extrae
 curl https://wordpress.org/latest.tar.gz | tar zx -C /srv/www
 ```
 
-> El primer comando crea un directorio, el segundo cambia la propiedad y el ultimo descarga la última versión de WordPress y la extrae
+**Resultado obtenido:**
+<br>
 
 ![imagen](https://github.com/user-attachments/assets/b0ec9913-007b-4821-b5cb-b2fbdd01619e)
 
 </details> 
 
 <details>
-<summary> 3. Creación y configuración de una página WordPress en Apache: </summary>
-
-- Creación de la página con la siguiente configuración:
+<summary> <b> 3. Creación y configuración de una página WordPress en Apache: </b> </summary>
+<br>
     
-    Se crea y abre el fichero de configuración
-    ```bash
-    nano etc/apache2/sites-available/wordpress.conf
-    ```
+Se <b> crea </b> y <b> abre </b> el fichero de configuración:
+```bash
+nano etc/apache2/sites-available/wordpress.conf
+```
+
+Se <b> pega </b> la siguiente configuración en el fichero:
+```bash
+<VirtualHost *:80>
+    DocumentRoot /srv/www/wordpress
+    <Directory /srv/www/wordpress>
+        Options FollowSymLinks
+        AllowOverride Limit Options FileInfo
+        DirectoryIndex index.php
+        Require all granted
+    </Directory>
+    <Directory /srv/www/wordpress/wp-content>
+        Options FollowSymLinks
+        Require all granted
+    </Directory>
+</VirtualHost>
+```
     
-    Se pega la siguiente configuración
-    ```bash
-    <VirtualHost *:80>
-        DocumentRoot /srv/www/wordpress
-        <Directory /srv/www/wordpress>
-            Options FollowSymLinks
-            AllowOverride Limit Options FileInfo
-            DirectoryIndex index.php
-            Require all granted
-        </Directory>
-        <Directory /srv/www/wordpress/wp-content>
-            Options FollowSymLinks
-            Require all granted
-        </Directory>
-    </VirtualHost>
-    ```
-    
-- Habilitar el funcionamiento de la página:
-    ```bash
-    a2ensite wordpress
-    a2enmod rewrite
-    a2dissite 000-default
-    service apache2 reload
-    ```
+Se <b> habilita </b> el funcionamiento de la página:
 
+```bash
+# Habilita la web de WordPress
+a2ensite wordpress
 
-> El primer comando habilita la web de wordpress, el segundo habilita la reescritura, el tercero desactiva la web predeterminada y el último reinicia el servicio de Apache.
+# Habilita la reescritura
+a2enmod rewrite
 
-- Para comprobar el correcto funcionamiento de WordPress se accede al link mediante la IP:
-    ```bash
-    http://10.0.9.153:8000/wp-admin/setup-config.php
-    ```
+# Desactiva la web por defecto
+a2dissite 000-default
 
-    ![imagen](https://github.com/user-attachments/assets/e6df6b9c-ba44-446f-913e-4bf7b4969fb6)
+# Reinicia el servicio de Apache
+service apache2 reload
+```
+
+Para <b> comprobar el correcto funcionamiento </b> de WordPress se accede al link mediante la IP:
+
+```bash
+http://10.0.9.153:8000/wp-admin/setup-config.php
+```
+
+![imagen](https://github.com/user-attachments/assets/e6df6b9c-ba44-446f-913e-4bf7b4969fb6)
 </details>
 
 <details>
-<summary> 4. Configuración de la base de datos MySQL: </summary>
+<summary> <b> 4. Configuración de la base de datos MySQL: </b> </summary>
+<br>
 
+**Creación** de una **base de datos**
+    
+```bash
+mysql -u root
+CREATE DATABASE wordpress;
+CREATE USER pablo IDENTIFIED BY 'admin';
+GRANT SELECT,INSERT,UPDATE,DELETE,CREATE,DROP,ALTER ON wordpress.* TO pablo;
+FLUSH PRIVILEGES;
+quit
 
-- Creación de una base de datos
-    ```bash
-    mysql -u root
-    CREATE DATABASE wordpress;
-    CREATE USER pablo IDENTIFIED BY 'admin';
-    GRANT SELECT,INSERT,UPDATE,DELETE,CREATE,DROP,ALTER ON wordpress.* TO pablo;
-    FLUSH PRIVILEGES;
-    quit
+# Iniciar la base de datos
+service mysql start
+```
+
+> Si no funciona es porque hay que volver a instalar mariadb e iniciar de nuevo el servicio.
+
+> A veces también hay que iniciar de nuevo el servicio de Apache.
+
+**Configuración de la base de datos**
     
-    # Iniciar la base de datos
-    service mysql start
-    ```
-- Configuración de la base de datos
-    
-    Se crea el fichero de configuración y se escribe el texto generado desde wordpress:
+- Se crea el fichero de configuración y se escribe el texto generado desde wordpress:
     
     ```bash
+    # Crear fichero de configuración
     touch /srv/www/wordpress/wp-config.php
+    
+    # Acceder al fichero de configuración
     nano /srv/www/wordpress/wp-config.php
     ```
 
     <details>
-    <summary> Este es el texto generado en mi caso: </summary>
+    <summary> Este es el texto generado que hay que copiar en el fichero <b> wp-config.php </b>: </summary>
+    <br>
     
     ```bash
     <?php
@@ -288,19 +334,25 @@ curl https://wordpress.org/latest.tar.gz | tar zx -C /srv/www
 </details>
 
 <details>
-<summary> 5. Creación finalización de wordpress </summary>
-    
-- Se indica la información que nos pide:
-    
+<summary> <b> 5. Creación y comprobación de funcionamiento </b> </summary>
+<br>
+
+<b> Se indica la información que nos pide: </b>
+<br>
+
 ![imagen](https://github.com/user-attachments/assets/7ca81cba-5af1-4d6a-aa23-8dac2c88c44b)
 
-- Instalamos WordPress y continuamos:
+<b> Instalamos WordPress y continuamos: </b>
+<br>
 
 ![imagen](https://github.com/user-attachments/assets/ad29296b-4c58-4907-8de2-e5052624c415)
 
-- Nos logeamos y comprobamos que todo funciona bien:
+<b> Nos logeamos y comprobamos que todo funciona bien: </b>
+<br>
 
 ![imagen](https://github.com/user-attachments/assets/21bebdc3-f6a1-40b3-b715-0bb6e8fc30ad)
 
-En mi caso todo funciona a la perfección.
+En mi caso <b> todo funciona a la perfección. </b>
 </details>
+
+---
