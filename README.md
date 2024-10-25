@@ -29,7 +29,9 @@ Instalar **MariaDB**:
 ```bash
 sudo apt install -y mariadb-server mariadb-client
 ```
-- La opción **-y** responde "sí" automáticamente a cualquier solicitud de confirmación durante la instalación.
+
+> [!IMPORTANT]
+> La opción **-y** responde "sí" automáticamente a cualquier solicitud de confirmación durante la instalación.
 
 Se inicializa MariaDB para poder continuar y usar comandos PHP:
 ```bash
@@ -73,7 +75,9 @@ echo "<?php phpinfo(); ?>" | tee /var/www/html/info.php
 
 ---
 ### 2. Utiliza esta guía para instalar wordpress en el contenedor.
-1. Se instalan todas las dependencias necesarias:
+<details>
+<summary> 1. Se instalan todas las dependencias necesarias:</summary>
+
 ```bash
 sudo apt install apache2 \
                  ghostscript \
@@ -90,7 +94,66 @@ sudo apt install apache2 \
                  php-xml \
                  php-zip
 ```
-2. Se instala WordPress utilizando:
-```bash
 
+</details>
+
+<details>
+<summary> 2. Se instala WordPress utilizando: </summary>
+
+```bash
+mkdir -p /srv/www
+sudo chown www-data: /srv/www
+curl https://wordpress.org/latest.tar.gz | tar zx -C /srv/www
 ```
+> [!NOTE]
+> El primer comando crea un directorio, el segundo cambia la propiedad y el ultimo descarga la última versión de WordPress y la extrae
+
+![imagen](https://github.com/user-attachments/assets/b0ec9913-007b-4821-b5cb-b2fbdd01619e)
+
+</details> 
+
+<details>
+<summary> 3. Creación y configuración de una página WordPress en Apache: </summary>
+
+- Creación de la página con la siguiente configuración:
+    
+    Se crea y abre el fichero de configuración
+    ```bash
+    nano etc/apache2/sites-available/wordpress.conf
+    ```
+    
+    Se pega la siguiente configuración
+    ```bash
+    <VirtualHost *:80>
+        DocumentRoot /srv/www/wordpress
+        <Directory /srv/www/wordpress>
+            Options FollowSymLinks
+            AllowOverride Limit Options FileInfo
+            DirectoryIndex index.php
+            Require all granted
+        </Directory>
+        <Directory /srv/www/wordpress/wp-content>
+            Options FollowSymLinks
+            Require all granted
+        </Directory>
+    </VirtualHost>
+    ```
+    
+- Habilitar el funcionamiento de la página:
+    ```bash
+    a2ensite wordpress
+    a2enmod rewrite
+    a2dissite 000-default
+    service apache2 reload
+    ```
+    
+> [!NOTE]
+> El primer comando habilita la web de wordpress, el segundo habilita la reescritura, el tercero desactiva la web predeterminada y el último reinicia el servicio de Apache.
+
+- Para comprobar el correcto funcionamiento de WordPress se accede al link mediante la IP:
+    ```bash
+    http://10.0.9.153:8000/wp-admin/setup-config.php
+    ```
+
+    ![imagen](https://github.com/user-attachments/assets/e6df6b9c-ba44-446f-913e-4bf7b4969fb6)
+</details> 
